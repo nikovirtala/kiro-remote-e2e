@@ -1,0 +1,24 @@
+# For the kiro-remote GitHub wake e2e: a pull request that adds the marker
+# string below fails this check on purpose, so the harness can verify that a
+# failing check wakes the session. Every other pull request passes.
+name: e2e check
+
+on: pull_request
+
+permissions:
+  contents: read
+
+jobs:
+  marker:
+    name: e2e marker check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Fail when the pull request carries the e2e failure marker
+        run: |
+          marker="KIRO_E2E""_FAIL_CHECK"
+          if grep -rl --exclude-dir=.git --exclude-dir=.github "$marker" .; then
+            echo "marker found: failing on purpose for the kiro-remote e2e"
+            exit 1
+          fi
+          echo "no marker: nothing to fail"
